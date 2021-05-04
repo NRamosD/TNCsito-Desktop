@@ -40,6 +40,7 @@
             // notificacion
             // 
             this.notificacion.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Warning;
+            this.notificacion.Icon = ((System.Drawing.Icon)(resources.GetObject("notificacion.Icon")));
             this.notificacion.Text = "notifyIcon1";
             this.notificacion.Visible = true;
             // 

@@ -74,7 +74,6 @@ namespace TNCsitoDesk
                 {
                     //MessageBox.Show($"Entro {datos[0]} {datos[1]} {datos[2]}");
                     notificar();
-                    
                 }              
             });
             
@@ -98,27 +97,32 @@ namespace TNCsitoDesk
             int tipo= int.Parse(datos[2]);
             string mensaje=datos[0];
             string remitente = datos[1];
-            notificacion.Icon = new System.Drawing.Icon(Path.GetFullPath(@"../../imagen/ayay.ico"));
-            notificacion.Text = "Atiende tus notificaciones...";
+            //notificacion.Icon = new System.Drawing.Icon(Path.GetFullPath(@"../../imagen/ayay.ico"));
             notificacion.Visible = true;
             switch (tipo)
             {
                 case 1:
+                    notificacion.Text = "Atiende tus notificaciones...";
                     notificacion.BalloonTipTitle = "Te estan llamando :/";//este importa
                     notificacion.BalloonTipText = "Alguien necesita que vayas por algún motivo desconocido u.u";
                     notificacion.ShowBalloonTip(3000);
                     break;
                 case 2:
+                    notificacion.Text = "Atiende tus notificaciones...";
+                    notificacion.Icon = new System.Drawing.Icon(Path.GetFullPath(@"../../imagen/ayay.ico"));
+                    notificacion.Text = "Atiende tus notificaciones...";
                     notificacion.BalloonTipTitle = "Quieren que lleves algo...";//este importa
                     notificacion.BalloonTipText = mensaje;//este importa
                     notificacion.ShowBalloonTip(3000);
                     break;
                 case 3:
+                    notificacion.Text = "Atiende tus notificaciones...";
                     notificacion.BalloonTipTitle = "Alguien pregunta si...";//este importa
                     notificacion.BalloonTipText = mensaje;//este importa
                     notificacion.ShowBalloonTip(3000);
                     break;
                 case 4:
+                    notificacion.Text = "Atiende tus notificaciones...";
                     notificacion.BalloonTipTitle = "EMERGENCIA!!";//este importa
                     notificacion.BalloonTipText = "Te están llamando, ve lo más rápido que puedas.";//este importa
                     notificacion.ShowBalloonTip(3000);
@@ -177,6 +181,7 @@ namespace TNCsitoDesk
         {
             listBox.Items.Clear();
         }
+
     }
     public class Pedido
     {
