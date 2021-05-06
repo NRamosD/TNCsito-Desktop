@@ -25,26 +25,31 @@ namespace TNCsitoDesk
         public Form1()
         {
             InitializeComponent();
-            this.BackColor = Color.DarkCyan;
         }
 
 
 
-        IFirebaseConfig config = new FirebaseConfig
-        {
-            
-            //"ubZ1tomtK1BFgdotVQoCJiDHE4zhaEvFdxoF4TiO"    "https://tncsito-135d4-default-rtdb.firebaseio.com/"
-            AuthSecret = ConfigurationManager.AppSettings["AUTH"],
-            BasePath = ConfigurationManager.AppSettings["BASE_PATH"]
-        };
 
         IFirebaseClient client;
+        roomdata rd = new roomdata();
         EventStreamResponse listener;
         List<string> datos = new List<string>();
 
+        #region Inicio
         private async void Form1_Load(object sender, EventArgs e)
         {
-            client = new FireSharp.FirebaseClient(config);
+            //Limpiar lista deshabilitado
+            btnLimpiar.Enabled = false;
+            //Verifico que exista la sala
+            if (rd.getUser()!="" && rd.getPass()!= "")
+            {
+                rd.buscarSala();
+                btnLimpiar.Enabled = true;
+            }
+
+            //start client
+            client = new FireSharp.FirebaseClient(rd.config);
+
             if (client != null)
             {
                 try
@@ -56,14 +61,12 @@ namespace TNCsitoDesk
                 {
                     Console.WriteLine(exc);
                 }
-                
-                
                 setListener();
-                //MessageBox.Show("Conección establecida\n"+client.ToString());
             }
         }
+        #endregion
 
-
+        #region DB
         //Métodos
         async void setListener()
         {
@@ -92,39 +95,58 @@ namespace TNCsitoDesk
             //Pedido p = res.ResultAs<Pedido[]>();
             MessageBox.Show("uhm\n" + p.tipo);
         }
+
+        public async void crearSala()
+        {
+            try
+            {
+                //MessageBox.Show("Hubo\n"+ Properties.Settings.Default["nameroom"].ToString() + "---"+ 
+                  //  Properties.Settings.Default["passroom"].ToString());
+                //Pedido p = new Pedido("","",1);
+                await client.SetAsync($"rama/"+Properties.Settings.Default["nameroom"].ToString(),"");
+                await client.SetAsync($"rama/" + Properties.Settings.Default["nameroom"]+"/algomas".ToString(), "");
+            }
+            catch (Exception exc)
+            {
+                MessageBox.Show("Hubo un problema","Se presentó el siguiente error: "+exc);
+            }
+        }
+
+
+
+
+
+        #endregion
+
+        #region Métodos locales
         public void notificar()
         {
             int tipo= int.Parse(datos[2]);
             string mensaje=datos[0];
             string remitente = datos[1];
-            //notificacion.Icon = new System.Drawing.Icon(Path.GetFullPath(@"../../imagen/ayay.ico"));
+            notificacion.Text = "Atiende tus notificaciones...";
             notificacion.Visible = true;
             switch (tipo)
             {
                 case 1:
-                    notificacion.Text = "Atiende tus notificaciones...";
-                    notificacion.BalloonTipTitle = "Te estan llamando :/";//este importa
+                    notificacion.BalloonTipTitle = "Te estan llamando :/";
                     notificacion.BalloonTipText = "Alguien necesita que vayas por algún motivo desconocido u.u";
                     notificacion.ShowBalloonTip(3000);
                     break;
                 case 2:
-                    notificacion.Text = "Atiende tus notificaciones...";
-                    notificacion.Icon = new System.Drawing.Icon(Path.GetFullPath(@"../../imagen/ayay.ico"));
-                    notificacion.Text = "Atiende tus notificaciones...";
-                    notificacion.BalloonTipTitle = "Quieren que lleves algo...";//este importa
-                    notificacion.BalloonTipText = mensaje;//este importa
+                    
+                    notificacion.BalloonTipTitle = "Quieren que lleves algo...";
+                    notificacion.BalloonTipText = mensaje;
                     notificacion.ShowBalloonTip(3000);
                     break;
                 case 3:
-                    notificacion.Text = "Atiende tus notificaciones...";
-                    notificacion.BalloonTipTitle = "Alguien pregunta si...";//este importa
-                    notificacion.BalloonTipText = mensaje;//este importa
+                    notificacion.BalloonTipTitle = "Alguien pregunta si...";
+                    notificacion.BalloonTipText = mensaje;
                     notificacion.ShowBalloonTip(3000);
                     break;
                 case 4:
-                    notificacion.Text = "Atiende tus notificaciones...";
-                    notificacion.BalloonTipTitle = "EMERGENCIA!!";//este importa
-                    notificacion.BalloonTipText = "Te están llamando, ve lo más rápido que puedas.";//este importa
+                    notificacion.BalloonTipTitle = "EMERGENCIA!!";
+                    notificacion.BalloonTipText = "Te están llamando, ve lo más rápido que puedas.";
                     notificacion.ShowBalloonTip(3000);
                     break;
                 default:
@@ -171,7 +193,10 @@ namespace TNCsitoDesk
             });
             TypingThread.Start();
         }
+        #endregion
 
+
+        #region Eventos
         private void btnSalir_Click(object sender, EventArgs e)
         {
             Application.Exit();
@@ -182,9 +207,34 @@ namespace TNCsitoDesk
             listBox.Items.Clear();
         }
 
+        private void btnMinimizar_Click(object sender, EventArgs e)
+        {
+            this.WindowState = FormWindowState.Minimized;
+        }
+
+
+        private void btnBegin_Click(object sender, EventArgs e)
+        {
+            this.Hide();
+            configuracion fconfig = new configuracion();
+            fconfig.Show();
+        }
+        #endregion
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            crearSala();
+        }
     }
+
     public class Pedido
     {
+        public Pedido(string r, string m, int t)
+        {
+            this.remitente = r;
+            this.mensaje = m;
+            this.tipo = t;
+        }
         public string mensaje { get; set; }
         public string remitente { get; set; }
         public int tipo { get; set; }

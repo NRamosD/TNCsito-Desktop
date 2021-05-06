@@ -22,5 +22,29 @@ namespace TNCsitoDesk.Properties {
                 return defaultInstance;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string nameroom {
+            get {
+                return ((string)(this["nameroom"]));
+            }
+            set {
+                this["nameroom"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string passroom {
+            get {
+                return ((string)(this["passroom"]));
+            }
+            set {
+                this["passroom"] = value;
+            }
+        }
     }
 }
