@@ -36,8 +36,11 @@
             this.btnSalir = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.btnMinimizar = new System.Windows.Forms.Button();
-            this.btnBegin = new System.Windows.Forms.Button();
-            this.button1 = new System.Windows.Forms.Button();
+            this.btnAjustes = new System.Windows.Forms.Button();
+            this.lbMensaje = new System.Windows.Forms.Label();
+            this.btnIniciar = new System.Windows.Forms.Button();
+            this.chBConect = new System.Windows.Forms.CheckBox();
+            this.toolTip = new System.Windows.Forms.ToolTip(this.components);
             this.SuspendLayout();
             // 
             // notificacion
@@ -61,7 +64,7 @@
             this.btnLimpiar.BackColor = System.Drawing.Color.Transparent;
             this.btnLimpiar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnLimpiar.ForeColor = System.Drawing.Color.White;
-            this.btnLimpiar.Location = new System.Drawing.Point(294, 112);
+            this.btnLimpiar.Location = new System.Drawing.Point(294, 77);
             this.btnLimpiar.Name = "btnLimpiar";
             this.btnLimpiar.Size = new System.Drawing.Size(72, 29);
             this.btnLimpiar.TabIndex = 1;
@@ -106,28 +109,60 @@
             this.btnMinimizar.UseVisualStyleBackColor = false;
             this.btnMinimizar.Click += new System.EventHandler(this.btnMinimizar_Click);
             // 
-            // btnBegin
+            // btnAjustes
             // 
-            this.btnBegin.BackColor = System.Drawing.Color.Transparent;
-            this.btnBegin.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnBegin.ForeColor = System.Drawing.Color.White;
-            this.btnBegin.Location = new System.Drawing.Point(294, 35);
-            this.btnBegin.Name = "btnBegin";
-            this.btnBegin.Size = new System.Drawing.Size(72, 29);
-            this.btnBegin.TabIndex = 6;
-            this.btnBegin.Text = "INICIAR";
-            this.btnBegin.UseVisualStyleBackColor = false;
-            this.btnBegin.Click += new System.EventHandler(this.btnBegin_Click);
+            this.btnAjustes.BackColor = System.Drawing.Color.Transparent;
+            this.btnAjustes.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnAjustes.Font = new System.Drawing.Font("Palatino Linotype", 8.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnAjustes.ForeColor = System.Drawing.Color.White;
+            this.btnAjustes.Location = new System.Drawing.Point(294, 114);
+            this.btnAjustes.Name = "btnAjustes";
+            this.btnAjustes.Size = new System.Drawing.Size(72, 29);
+            this.btnAjustes.TabIndex = 6;
+            this.btnAjustes.Text = "AJUSTES";
+            this.btnAjustes.UseVisualStyleBackColor = false;
+            this.btnAjustes.Click += new System.EventHandler(this.btnBegin_Click);
             // 
-            // button1
+            // lbMensaje
             // 
-            this.button1.Location = new System.Drawing.Point(227, 9);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 7;
-            this.button1.Text = "button1";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.lbMensaje.AutoSize = true;
+            this.lbMensaje.Location = new System.Drawing.Point(199, 7);
+            this.lbMensaje.Name = "lbMensaje";
+            this.lbMensaje.Size = new System.Drawing.Size(38, 15);
+            this.lbMensaje.TabIndex = 8;
+            this.lbMensaje.Text = "label2";
+            this.lbMensaje.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            // 
+            // btnIniciar
+            // 
+            this.btnIniciar.BackColor = System.Drawing.Color.Transparent;
+            this.btnIniciar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnIniciar.Font = new System.Drawing.Font("Palatino Linotype", 8.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnIniciar.ForeColor = System.Drawing.Color.White;
+            this.btnIniciar.Location = new System.Drawing.Point(294, 35);
+            this.btnIniciar.Name = "btnIniciar";
+            this.btnIniciar.Size = new System.Drawing.Size(72, 29);
+            this.btnIniciar.TabIndex = 9;
+            this.btnIniciar.Text = "INICIAR";
+            this.btnIniciar.UseVisualStyleBackColor = false;
+            this.btnIniciar.Click += new System.EventHandler(this.btnIniciar_Click);
+            // 
+            // chBConect
+            // 
+            this.chBConect.Appearance = System.Windows.Forms.Appearance.Button;
+            this.chBConect.AutoCheck = false;
+            this.chBConect.AutoSize = true;
+            this.chBConect.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.chBConect.Font = new System.Drawing.Font("Palatino Linotype", 5.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.chBConect.ForeColor = System.Drawing.Color.White;
+            this.chBConect.Location = new System.Drawing.Point(317, 7);
+            this.chBConect.Name = "chBConect";
+            this.chBConect.Size = new System.Drawing.Size(19, 19);
+            this.chBConect.TabIndex = 10;
+            this.chBConect.Text = "  ";
+            this.chBConect.UseVisualStyleBackColor = true;
+            this.chBConect.MouseLeave += new System.EventHandler(this.chBConect_MouseLeave);
+            this.chBConect.MouseHover += new System.EventHandler(this.chBConect_MouseHover);
             // 
             // Form1
             // 
@@ -135,8 +170,10 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Black;
             this.ClientSize = new System.Drawing.Size(378, 188);
-            this.Controls.Add(this.button1);
-            this.Controls.Add(this.btnBegin);
+            this.Controls.Add(this.chBConect);
+            this.Controls.Add(this.btnIniciar);
+            this.Controls.Add(this.lbMensaje);
+            this.Controls.Add(this.btnAjustes);
             this.Controls.Add(this.btnMinimizar);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.btnSalir);
@@ -163,8 +200,11 @@
         private System.Windows.Forms.Button btnSalir;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button btnMinimizar;
-        private System.Windows.Forms.Button btnBegin;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button btnAjustes;
+        private System.Windows.Forms.Label lbMensaje;
+        private System.Windows.Forms.Button btnIniciar;
+        private System.Windows.Forms.CheckBox chBConect;
+        private System.Windows.Forms.ToolTip toolTip;
     }
 }
 

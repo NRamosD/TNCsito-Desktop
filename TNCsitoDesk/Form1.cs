@@ -28,8 +28,6 @@ namespace TNCsitoDesk
         }
 
 
-
-
         IFirebaseClient client;
         roomdata rd = new roomdata();
         EventStreamResponse listener;
@@ -38,30 +36,39 @@ namespace TNCsitoDesk
         #region Inicio
         private async void Form1_Load(object sender, EventArgs e)
         {
-            //Limpiar lista deshabilitado
-            btnLimpiar.Enabled = false;
             //Verifico que exista la sala
-            if (rd.getUser()!="" && rd.getPass()!= "")
+            string user = Properties.Settings.Default.nameroom.ToString();
+            string pass = Properties.Settings.Default.passroom.ToString();
+            try
             {
-                rd.buscarSala();
-                btnLimpiar.Enabled = true;
+                if (user != "" && pass != "")
+                {
+                    //start client
+                    client = new FireSharp.FirebaseClient(rd.config);
+
+                    if (client != null)
+                    {
+                        try
+                        {
+                            //deletePreviousOrders();
+                            await Task.Delay(2000);
+                        }
+                        catch (Exception exc)
+                        {
+                            Console.WriteLine(exc);
+                        }
+                        setListener();
+                        chBConect.BackColor = Color.Red;
+                    }
+                }
+                else
+                {
+                    lbMensaje.Text = "Crea una sala";
+                }
             }
-
-            //start client
-            client = new FireSharp.FirebaseClient(rd.config);
-
-            if (client != null)
+            catch(Exception exc)
             {
-                try
-                {
-                    eliminarTodoAlIniciar();
-                    await Task.Delay(2000);
-                }
-                catch(Exception exc)
-                {
-                    Console.WriteLine(exc);
-                }
-                setListener();
+                MessageBox.Show("Algo salió mal", "Ocurrió un error durante la ejecución.\nCódigo de error: " + exc);
             }
         }
         #endregion
@@ -71,7 +78,7 @@ namespace TNCsitoDesk
         async void setListener()
         {
             
-            listener = await client.OnAsync("req", (sender, args, context) => {
+            listener = await client.OnAsync($"bdtncsito/rooms/{Properties.Settings.Default.nameroom}/orders", (sender, args, context) => {
                 datos.Add(args.Data.ToString());
                 if (datos.Count == 3)
                 {
@@ -81,39 +88,66 @@ namespace TNCsitoDesk
             });
             
         }
-        async void eliminarTodoAlIniciar()
+        /*async void deletePreviousOrders()
         {
-            FirebaseResponse response = await client.DeleteAsync("req");
-            //MessageBox.Show(""+response.StatusCode);
-        }
-        private async void LiveCall()
-        {
-            ///-MZJvf63pzVNCoAoVd_F
-            var res = await client.GetAsync("req/-MZJvf63pzVNCoAoVd_F");
-            //var objResponse1 = JsonConvert.DeserializeObject<List<Pedido>>(res.Body);
-            Pedido p = res.ResultAs<Pedido>();
-            //Pedido p = res.ResultAs<Pedido[]>();
-            MessageBox.Show("uhm\n" + p.tipo);
-        }
+            //Eliminar los datos de pedidos previos
+            FirebaseResponse response = await client.DeleteAsync($"bdtncsito/rooms/{Properties.Settings.Default["nameroom"]}/orders");
+            if (response.StatusCode.ToString()!="OK")
+            {
+                MessageBox.Show("Algo salió mal","No se pudo borrar la sala.\nCódigo de error: "+ response.StatusCode);
+            }
+        }*/
 
-        public async void crearSala()
+        public async void createRoom()
         {
             try
             {
-                //MessageBox.Show("Hubo\n"+ Properties.Settings.Default["nameroom"].ToString() + "---"+ 
-                  //  Properties.Settings.Default["passroom"].ToString());
-                //Pedido p = new Pedido("","",1);
-                await client.SetAsync($"rama/"+Properties.Settings.Default["nameroom"].ToString(),"");
-                await client.SetAsync($"rama/" + Properties.Settings.Default["nameroom"]+"/algomas".ToString(), "");
+                if (searchRoom())
+                {
+                    Properties.Settings.Default["activeroom"] = true;
+                    credentials cr = new credentials()
+                    {
+                        name = Properties.Settings.Default["nameroom"].ToString(),
+                        pass = Properties.Settings.Default["passroom"].ToString(),
+                        active = (bool)Properties.Settings.Default["activeroom"]
+                    };
+                    await client.SetAsync("bdtncsito/rooms/" + Properties.Settings.Default["nameroom"].ToString() + "/credentials", cr);
+                    //cambio el estado en la interfaz
+                    chBConect.BackColor = Color.GreenYellow;
+                }
+                else
+                {
+                    MessageBox.Show("El nombre de sala ingresado no se encuentra disponible, escriba otro nombre.","Nombre de no disponible");
+                }
             }
             catch (Exception exc)
             {
-                MessageBox.Show("Hubo un problema","Se presentó el siguiente error: "+exc);
+                MessageBox.Show("Se presentó el siguiente error: " + exc, "Hubo un problema");
             }
         }
 
+        public async void updateRoom()
+        {
+            credentials cr = new credentials()
+            {
+                name = Properties.Settings.Default["nameroom"].ToString(),
+                pass = Properties.Settings.Default["passroom"].ToString(),
+                active = (bool)Properties.Settings.Default["activeroom"]
+            };
+            await client.UpdateAsync("bdtncsito/rooms/"+Properties.Settings.Default["nameroom"].ToString()+"/credentials", cr);
+        }
 
-
+        public bool searchRoom()
+        {
+            bool flag = false;
+            var data = client.Get("bdtncsito/rooms/" + Properties.Settings.Default["nameroom"].ToString());
+            if (data.Body != null)
+            {
+                flag = true;
+                return flag;
+            }
+            return flag;
+        }
 
 
         #endregion
@@ -195,11 +229,23 @@ namespace TNCsitoDesk
         }
         #endregion
 
-
         #region Eventos
-        private void btnSalir_Click(object sender, EventArgs e)
+        private async void btnSalir_Click(object sender, EventArgs e)
         {
-            Application.Exit();
+            //Dejo inactiva la sala por defecto
+            Properties.Settings.Default["activeroom"] = false;
+            //elimino la sala para proteger la info
+            FirebaseResponse response = await client.DeleteAsync($"bdtncsito/rooms/{Properties.Settings.Default["nameroom"]}");
+            await Task.Delay(2000);
+            if (response.StatusCode.ToString() != "OK")
+            {
+                MessageBox.Show("Algo salió mal", "No se pudo borrar la sala.\nCódigo de error: " + response.StatusCode);
+            }
+            else
+            {
+                Application.Exit();
+            }
+            
         }
 
         private void btnLimpiar_Click(object sender, EventArgs e)
@@ -219,24 +265,32 @@ namespace TNCsitoDesk
             configuracion fconfig = new configuracion();
             fconfig.Show();
         }
+        private void btnIniciar_Click(object sender, EventArgs e)
+        {
+            Properties.Settings.Default["activeroom"] = true;
+            createRoom();
+        }
+
         #endregion
 
-        private void button1_Click(object sender, EventArgs e)
+        private void chBConect_MouseHover(object sender, EventArgs e)
         {
-            crearSala();
+            if (chBConect.BackColor == Color.GreenYellow)
+            {
+                toolTip.ShowAlways = true;
+                toolTip.SetToolTip(chBConect, "Activo");
+            }
+            else
+            {
+                toolTip.ShowAlways = true;
+                toolTip.SetToolTip(chBConect, "Desconectado");
+            }
+            
         }
-    }
 
-    public class Pedido
-    {
-        public Pedido(string r, string m, int t)
+        private void chBConect_MouseLeave(object sender, EventArgs e)
         {
-            this.remitente = r;
-            this.mensaje = m;
-            this.tipo = t;
+
         }
-        public string mensaje { get; set; }
-        public string remitente { get; set; }
-        public int tipo { get; set; }
     }
 }

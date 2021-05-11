@@ -28,15 +28,14 @@ namespace TNCsitoDesk
         {
             try
             {
-                
-                //guardar informacion
                 Properties.Settings.Default["nameroom"] = tbNombre.Text;
                 Properties.Settings.Default["passroom"] = tbContra.Text;
+                Properties.Settings.Default["activeroom"] = false;
                 Properties.Settings.Default.Save();
             }
             catch(Exception exc)
             {
-                MessageBox.Show("Ha ocurrido un problema","");
+                MessageBox.Show("Ha ocurrido un problema","Lo sentimos");
             }
             //regreso
             inicio.Show();

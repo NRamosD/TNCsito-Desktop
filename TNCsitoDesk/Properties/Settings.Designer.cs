@@ -46,5 +46,17 @@ namespace TNCsitoDesk.Properties {
                 this["passroom"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool activeroom {
+            get {
+                return ((bool)(this["activeroom"]));
+            }
+            set {
+                this["activeroom"] = value;
+            }
+        }
     }
 }

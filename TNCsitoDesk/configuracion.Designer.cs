@@ -81,11 +81,11 @@
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Palatino Linotype", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label1.ForeColor = System.Drawing.Color.White;
-            this.label1.Location = new System.Drawing.Point(84, 15);
+            this.label1.Location = new System.Drawing.Point(23, 17);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(92, 18);
+            this.label1.Size = new System.Drawing.Size(201, 18);
             this.label1.TabIndex = 4;
-            this.label1.Text = "CREAR SALA";
+            this.label1.Text = "INGRESE DATOS DE LA SALA";
             // 
             // label2
             // 
