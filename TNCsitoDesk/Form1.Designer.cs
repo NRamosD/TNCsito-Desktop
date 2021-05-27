@@ -30,7 +30,6 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
-            this.notificacion = new System.Windows.Forms.NotifyIcon(this.components);
             this.listBox = new System.Windows.Forms.ListBox();
             this.btnLimpiar = new System.Windows.Forms.Button();
             this.btnSalir = new System.Windows.Forms.Button();
@@ -42,13 +41,6 @@
             this.chBConect = new System.Windows.Forms.CheckBox();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
             this.SuspendLayout();
-            // 
-            // notificacion
-            // 
-            this.notificacion.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Warning;
-            this.notificacion.Icon = ((System.Drawing.Icon)(resources.GetObject("notificacion.Icon")));
-            this.notificacion.Text = "notifyIcon1";
-            this.notificacion.Visible = true;
             // 
             // listBox
             // 
@@ -194,7 +186,6 @@
         }
 
         #endregion
-        private System.Windows.Forms.NotifyIcon notificacion;
         private System.Windows.Forms.ListBox listBox;
         private System.Windows.Forms.Button btnLimpiar;
         private System.Windows.Forms.Button btnSalir;

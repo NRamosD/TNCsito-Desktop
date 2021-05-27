@@ -15,7 +15,11 @@ using System.Windows.Forms;
 using FireSharp.Config;
 using FireSharp.Interfaces;
 using FireSharp.Response;
-
+using Microsoft.Toolkit.Uwp.Notifications;
+using Windows.ApplicationModel.Activation;
+using Windows.ApplicationModel.Background;
+using Windows.UI.Notifications;
+//using Microsoft.Toolkit.Uwp.Notifications;
 
 namespace TNCsitoDesk
 {
@@ -57,7 +61,7 @@ namespace TNCsitoDesk
                         {
                             Console.WriteLine(exc);
                         }
-                        setListener();
+                        setListener(sender,e);
                         chBConect.BackColor = Color.Red;
                     }
                 }
@@ -75,7 +79,7 @@ namespace TNCsitoDesk
 
         #region DB
         //Métodos
-        async void setListener()
+        async void setListener(object sndr, EventArgs e)
         {
             
             listener = await client.OnAsync($"bdtncsito/rooms/{Properties.Settings.Default.nameroom}/orders", (sender, args, context) => {
@@ -83,7 +87,8 @@ namespace TNCsitoDesk
                 if (datos.Count == 3)
                 {
                     //MessageBox.Show($"Entro {datos[0]} {datos[1]} {datos[2]}");
-                    notificar();
+                    notificar(sndr, e);
+                    //notificar(sender, args);
                 }              
             });
             
@@ -153,41 +158,31 @@ namespace TNCsitoDesk
         #endregion
 
         #region Métodos locales
-        public void notificar()
+        public async void notificar(object sender, EventArgs e)
         {
             int tipo= int.Parse(datos[2]);
             string mensaje=datos[0];
-            string remitente = datos[1];
-            notificacion.Text = "Atiende tus notificaciones...";
-            notificacion.Visible = true;
+            string emisor = datos[1];
+            await Task.Delay(1000);
             switch (tipo)
             {
                 case 1:
-                    notificacion.BalloonTipTitle = "Te estan llamando :/";
-                    notificacion.BalloonTipText = "Alguien necesita que vayas por algún motivo desconocido u.u";
-                    notificacion.ShowBalloonTip(3000);
+                    OnSendNormalNotification( $"{emisor} necesita que vayas por algún motivo desconocido...", "Te estan llamando 😓");
                     break;
                 case 2:
-                    
-                    notificacion.BalloonTipTitle = "Quieren que lleves algo...";
-                    notificacion.BalloonTipText = mensaje;
-                    notificacion.ShowBalloonTip(3000);
+                    OnSendNormalNotification($"{mensaje}", $"{emisor} necesita algo... 🙄");
                     break;
                 case 3:
-                    notificacion.BalloonTipTitle = "Alguien pregunta si...";
-                    notificacion.BalloonTipText = mensaje;
-                    notificacion.ShowBalloonTip(3000);
+                    OnSendInteractiveNotification(sender,e,mensaje, $"{emisor} pregunta...");
                     break;
                 case 4:
-                    notificacion.BalloonTipTitle = "EMERGENCIA!!";
-                    notificacion.BalloonTipText = "Te están llamando, ve lo más rápido que puedas.";
-                    notificacion.ShowBalloonTip(3000);
+                    OnSendNormalNotification($"{emisor} te esta llamando, ve lo más rápido que puedas.", "EMERGENCIA!! ⚠");
                     break;
                 default:
                     break;
 
             }
-            addListBox(mensaje, remitente,tipo);
+            addListBox(mensaje, emisor, tipo);
             datos = new List<string>();
         }
 
@@ -248,10 +243,61 @@ namespace TNCsitoDesk
             
         }
 
+        
+
+
+
+
         private void btnLimpiar_Click(object sender, EventArgs e)
         {
-            listBox.Items.Clear();
+            OnSendInteractiveNotification(sender,e,"alguna vaina","ulo");
+
+
+
+            /*
+            new ToastContentBuilder()
+            .AddArgument("action", "viewConversation")
+            .AddArgument("conversationId", 9813)
+            .AddText("Andrew sent you a picture")
+            .AddText("Check this out, The Enchantments in Washington!")
+            
+            .AddButton(new ToastButton()
+            .SetContent("Like")
+            .AddArgument("action", "like")
+            .SetBackgroundActivation())
+
+            .Show();
+            
+            new Toas
+
+            const string taskName = "ToastBackgroundTask";
+
+            // If background task is already registered, do nothing
+            if (BackgroundTaskRegistration.AllTasks.Any(i => i.Value.Name.Equals(taskName)))
+                return;
+
+            // Otherwise request access
+            BackgroundAccessStatus status = await BackgroundExecutionManager.RequestAccessAsync();
+
+            // Create the background task
+            BackgroundTaskBuilder builder = new BackgroundTaskBuilder()
+            {
+                Name = taskName
+            };
+
+            // Assign the toast action trigger
+            builder.SetTrigger(new ToastNotificationActionTrigger());
+
+            // And register the task
+            BackgroundTaskRegistration registration = builder.Register();
+
+            builder.
+            //listBox.Items.Clear();*/
         }
+
+
+
+
 
         private void btnMinimizar_Click(object sender, EventArgs e)
         {
@@ -272,6 +318,73 @@ namespace TNCsitoDesk
         }
 
         #endregion
+
+
+
+        #region Notifications
+
+        private void OnSendInteractiveNotification(object sender, EventArgs e, string msg, string title)
+        {
+            ToastNotificationManagerCompat.OnActivated += (args) =>
+            {
+                string outcome = string.Empty;
+
+                switch (args.Argument)
+                {
+                    case "yes":
+                        outcome = "You have clicked yes";
+                        break;
+                    case "no":
+                        outcome = "You have clicked no";
+                        break;
+                };
+
+            };
+
+            new ToastContentBuilder()
+                .AddHeader("d",title,"w")
+                .AddText(msg)
+                .AddButton(new ToastButton()
+                    .SetContent("Si")
+                    .AddArgument("yes")
+                    .SetBackgroundActivation())
+                .AddButton(new ToastButton()
+                    .SetContent("No")
+                    .AddArgument("no")
+                    .SetBackgroundActivation())
+                .Show(toast =>
+                {
+                    toast.ExpirationTime = DateTime.Now.AddSeconds(30);
+                });
+        }
+
+
+        private void OnSendNormalNotification(string msg, string title)
+        {
+            new ToastContentBuilder()
+                .AddHeader("", title, "")
+                .AddText(msg)
+                .AddButton(new ToastButton()
+                    .SetContent("Yes")
+                    .AddArgument("yes")
+                    .SetBackgroundActivation())
+                .AddButton(new ToastButton()
+                    .SetContent("No")
+                    .AddArgument("no")
+                    .SetBackgroundActivation())
+                .Show(toast =>
+                {
+                    toast.ExpirationTime = DateTime.Now.AddSeconds(30);
+                });
+        }
+
+
+
+
+
+
+        #endregion
+
 
         private void chBConect_MouseHover(object sender, EventArgs e)
         {

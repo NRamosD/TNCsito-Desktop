@@ -35,7 +35,7 @@ namespace TNCsitoDesk
             }
             catch(Exception exc)
             {
-                MessageBox.Show("Ha ocurrido un problema","Lo sentimos");
+                MessageBox.Show("Ha ocurrido un problema.\nCódigo de error "+exc.ToString(),"Lo sentimos");
             }
             //regreso
             inicio.Show();
