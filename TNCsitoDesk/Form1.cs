@@ -35,7 +35,11 @@ namespace TNCsitoDesk
         IFirebaseClient client;
         roomdata rd = new roomdata();
         EventStreamResponse listener;
+        
         List<string> datos = new List<string>();
+        List<string[]> devices = new List<string[]>();
+        string[] nameEnabledDevice = new string[2];
+        string idDevice = "";
 
         #region Inicio
         private async void Form1_Load(object sender, EventArgs e)
@@ -54,19 +58,24 @@ namespace TNCsitoDesk
                     {
                         try
                         {
-                            //deletePreviousOrders();
+                            setListenerOrders(sender, e);
+                            setListenerDevices();
+                            //indicadores de sala activa
+                            if ((bool)Properties.Settings.Default["activeroom"] == true){ chBConect.BackColor = Color.GreenYellow; btnIniciar.Enabled = false; }
+                            else { chBConect.BackColor = Color.Red; btnIniciar.Enabled = true; }
+
                             await Task.Delay(2000);
                         }
                         catch (Exception exc)
                         {
+                            MessageBox.Show("Ha ocurrido al conectarse.\nCódigo de error: "+exc.ToString(),"Lo sentimos");
                             Console.WriteLine(exc);
                         }
-                        setListener(sender,e);
-                        chBConect.BackColor = Color.Red;
                     }
                 }
                 else
                 {
+                    //al inicio de la app
                     lbMensaje.Text = "Crea una sala";
                 }
             }
@@ -79,19 +88,88 @@ namespace TNCsitoDesk
 
         #region DB
         //Métodos
-        async void setListener(object sndr, EventArgs e)
+        async void setListenerOrders(object sndr, EventArgs e)
         {
             
             listener = await client.OnAsync($"bdtncsito/rooms/{Properties.Settings.Default.nameroom}/orders", (sender, args, context) => {
                 datos.Add(args.Data.ToString());
-                if (datos.Count == 3)
+                if (datos.Count == 4)
                 {
-                    //MessageBox.Show($"Entro {datos[0]} {datos[1]} {datos[2]}");
+                    MessageBox.Show($"Entro {datos[0]} -- {datos[1]} -- {datos[2]} -- {datos[3]}");
                     notificar(sndr, e);
                     //notificar(sender, args);
                 }              
             });
             
+        }
+        //string nameDevice;
+        async void setListenerDevices()
+        {
+            List<string> d = new List<string>(); //almacenamiento temporal de datos
+            int cont = 0;
+            //client.ListenAsync($"bdtncsito/rooms/{Properties.Settings.Default.nameroom}/connectedDevices");
+            listener = await client.OnAsync($"bdtncsito/rooms/{Properties.Settings.Default.nameroom}/connectedDevices", (sender, args, context) => {
+                d.Add(args.Data.ToString());
+                
+                if (cont == 2)
+                {
+                    MessageBox.Show($"d0 {d[0]} d1 {d[1]} d2 {d[2]}");
+                    /*nameEnabledDevice[0] = d[1];
+                    nameEnabledDevice[1] = "1";
+                    devices.Add(nameEnabledDevice);*/
+                    client.SetAsync("bdtncsito/rooms/" + Properties.Settings.Default["nameroom"].ToString() + "/connectedDevices/" + d[0] + "/enabled", true);
+                    cont = 0;
+                    d = new List<string>();
+                }
+                
+                cont++;
+
+                /*
+                string a, b, c;
+                a = sender.ToString();
+                //b = context.ToString();
+                c = $"tipo del \n args {args.GetType()}\n sender {sender.GetType()}";
+                d.Add(args.Data.ToString());
+                MessageBox.Show($"datitos\n {a} \n {c}");
+                MessageBox.Show($"datitos args \n{args.Data}");
+                MessageBox.Show($"datitos tipo args \n{args.Data.GetType()}");
+                */
+                //MessageBox.Show("fuera del if" + d.ToString());
+                //nameDevice = d.Last<string>();
+                /*if (d.Count == 2)
+                {
+                    //MessageBox.Show($"Dentro del if {d[1]}");
+                    nameEnabledDevice[0] = d[1];
+                    nameEnabledDevice[1] = "1";
+                    devices.Add(nameEnabledDevice);
+                    if (d[0]!="")
+                    {
+                        //await Task.Delay(1000);
+                        MessageBox.Show($"que hay en el true {d[0]} ");
+                        client.Set("bdtncsito/rooms/" + Properties.Settings.Default["nameroom"].ToString() + "/connectedDevices/" + d[0] + "/enabled", true);
+                    }
+                    //MessageBox.Show($"Dispositivos habilitados {devices[0][0]} {devices[0][1]}");
+                    d.Clear();
+                    //notificar(sender, args);
+                }*/
+
+
+                //MessageBox.Show($"Entro {nameDevice}");
+                /*int i = 0;
+                foreach (string dato in d)
+                {
+                    idNameDevice[i] = dato;
+                    i++;
+                }
+                i = 0;*/
+                /*if (datos.Count == 4)
+                {
+                    MessageBox.Show($"Entro {datos[0]} -- {datos[1]} -- {datos[2]} -- {datos[3]}");
+                    notificar(sndr, e);
+                    //notificar(sender, args);
+                }*/
+            });
+
         }
         /*async void deletePreviousOrders()
         {
@@ -131,6 +209,14 @@ namespace TNCsitoDesk
             }
         }
 
+        public async void enabledDisabledDevices()
+        {
+
+            //await client.SetAsync("bdtncsito/rooms/" + Properties.Settings.Default["nameroom"].ToString() + "/connectedDevices/" + d[0] + "/enabled", true);
+        }
+
+
+
         public async void updateRoom()
         {
             credentials cr = new credentials()
@@ -154,16 +240,21 @@ namespace TNCsitoDesk
             return flag;
         }
 
+        
+
 
         #endregion
 
         #region Métodos locales
-        public async void notificar(object sender, EventArgs e)
+        public void notificar(object sender, EventArgs e)
         {
-            int tipo= int.Parse(datos[2]);
-            string mensaje=datos[0];
-            string emisor = datos[1];
-            await Task.Delay(1000);
+            idDevice = datos[0];
+            string mensaje = datos[1];
+            string emisor = datos[2];
+            int tipo = int.Parse(datos[3]);
+            
+            
+            //await Task.Delay(1000);
             switch (tipo)
             {
                 case 1:
@@ -173,7 +264,7 @@ namespace TNCsitoDesk
                     OnSendNormalNotification($"{mensaje}", $"{emisor} necesita algo... 🙄");
                     break;
                 case 3:
-                    OnSendInteractiveNotification(sender,e,mensaje, $"{emisor} pregunta...");
+                    OnSendInteractiveNotification(sender,e,mensaje, $"{emisor} pregunta...",idDevice);
                     break;
                 case 4:
                     OnSendNormalNotification($"{emisor} te esta llamando, ve lo más rápido que puedas.", "EMERGENCIA!! ⚠");
@@ -250,8 +341,8 @@ namespace TNCsitoDesk
 
         private void btnLimpiar_Click(object sender, EventArgs e)
         {
-            OnSendInteractiveNotification(sender,e,"alguna vaina","ulo");
-
+            //OnSendInteractiveNotification(sender,e,"alguna vaina","ulo",idDevice);
+            //MessageBox.Show($"esa vain {nameDevice}");
 
 
             /*
@@ -308,12 +399,13 @@ namespace TNCsitoDesk
         private void btnBegin_Click(object sender, EventArgs e)
         {
             this.Hide();
-            configuracion fconfig = new configuracion();
+            configuracion fconfig = new configuracion(devices);
             fconfig.Show();
         }
         private void btnIniciar_Click(object sender, EventArgs e)
         {
             Properties.Settings.Default["activeroom"] = true;
+            btnIniciar.Enabled = false;
             createRoom();
         }
 
@@ -323,7 +415,7 @@ namespace TNCsitoDesk
 
         #region Notifications
 
-        private void OnSendInteractiveNotification(object sender, EventArgs e, string msg, string title)
+        private void OnSendInteractiveNotification(object sender, EventArgs e, string msg, string title, string id)
         {
             ToastNotificationManagerCompat.OnActivated += (args) =>
             {
@@ -332,9 +424,11 @@ namespace TNCsitoDesk
                 switch (args.Argument)
                 {
                     case "yes":
+                        //SendMessageYesNo(true);
                         outcome = "You have clicked yes";
                         break;
                     case "no":
+                        //SendMessageYesNo(false);
                         outcome = "You have clicked no";
                         break;
                 };
@@ -379,6 +473,33 @@ namespace TNCsitoDesk
         }
 
 
+        public bool searchDevice()
+        {
+            bool flag = false;
+            var data = client.Get("bdtncsito/rooms/" + Properties.Settings.Default["nameroom"].ToString()+"/connectedDevices/"+idDevice);
+            if (data.Body != null)
+            {
+                flag = true;
+                return flag;
+            }
+            return flag;
+        }
+
+
+        private async void SendMessageYesNo(bool res)
+        {
+            try
+            {
+                if (searchDevice())
+                {
+                    await client.PushAsync("bdtncsito/rooms/" + Properties.Settings.Default["nameroom"].ToString() + "/connectedDevices/" + idDevice, res);
+                }
+            }
+            catch (Exception exc)
+            {
+                Console.WriteLine("Error" + exc);
+            }
+        }
 
 
 
